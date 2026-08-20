@@ -1,0 +1,408 @@
+/* ================================================
+   NAJEEF QURAN API — SHARED STYLES
+   Neomorphism/claymorphism, single maroon hue, no gradients
+   ================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --cream: #F3EEE3;
+  --cream-2: #EAE3D3;
+  --cream-3: #E1D8C4;
+  --maroon-900: #3D0F13;
+  --maroon-700: #5C1A1F;
+  --maroon-600: #6E2229;
+  --maroon-500: #8B3A3F;
+  --maroon-300: #B87478;
+  --maroon-100: #E4C9CB;
+  --ink: #2A1013;
+  --shadow-dark: rgba(92, 26, 31, 0.28);
+  --shadow-light: rgba(255, 255, 255, 0.9);
+  --get: #2E6B3E;
+  --post: #8B3A3F;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  animation: page-fade-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+body.menu-locked { overflow: hidden; }
+
+a { color: inherit; }
+
+/* ---------- SCROLL REVEAL ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; }
+  body { animation: none !important; opacity: 1 !important; }
+}
+
+/* ---------- RIPPLE (buttons) ---------- */
+.ripple-host { overflow: hidden; }
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple-anim 0.55s ease-out;
+}
+
+.btn-ghost .ripple,
+.btn-google .ripple,
+.btn-copy .ripple,
+.modal-done .ripple,
+.view-tab .ripple {
+  background: rgba(92, 26, 31, 0.14);
+}
+
+@keyframes ripple-anim {
+  to { transform: scale(2.6); opacity: 0; }
+}
+
+/* ---------- CODE COPY BUTTON ---------- */
+.code-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--maroon-600);
+  background: var(--cream);
+  border: 1px solid var(--maroon-100);
+  border-radius: 7px;
+  padding: 5px 9px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+pre:hover .code-copy-btn,
+.code-copy-btn:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.code-copy-btn:hover { background: var(--maroon-700); color: var(--cream); border-color: var(--maroon-700); }
+.code-copy-btn.copied { background: var(--get); color: #fff; border-color: var(--get); }
+
+@media (max-width: 720px) {
+  .code-copy-btn { opacity: 1; transform: none; }
+}
+
+/* ---------- CLAY UTILITIES (used sparingly now) ---------- */
+.clay-raised {
+  background: var(--cream);
+  box-shadow: 6px 6px 16px var(--shadow-dark), -6px -6px 16px var(--shadow-light);
+}
+
+.clay-inset {
+  background: var(--cream-2);
+  box-shadow: inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light);
+}
+
+/* ---------- NAV ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  background: var(--cream);
+  border-bottom: 1px solid rgba(92,26,31,0.12);
+}
+
+.nav-brand {
+  font-family: 'Amiri', serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--maroon-900);
+  text-decoration: none;
+  letter-spacing: 0.2px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.nav-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  text-decoration: none;
+  color: var(--maroon-600);
+  letter-spacing: 0.3px;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--maroon-900);
+  border-bottom-color: var(--maroon-700);
+}
+
+.nav-links a.cta-link {
+  background: var(--maroon-700);
+  color: var(--cream);
+  padding: 9px 16px;
+  border-radius: 10px;
+  border-bottom: none;
+  box-shadow: 3px 3px 8px var(--shadow-dark);
+}
+
+.nav-links a.cta-link:hover {
+  background: var(--maroon-600);
+}
+
+/* Hamburger */
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 60;
+}
+
+.burger span {
+  width: 22px;
+  height: 2px;
+  background: var(--maroon-900);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger.open span:nth-child(2) { opacity: 0; }
+.burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 720px) {
+  .burger { display: flex; }
+
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    height: 100dvh;
+    width: min(78vw, 320px);
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 56px 28px 24px;
+    gap: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: right 0.3s ease;
+    box-shadow: -8px 0 24px rgba(0,0,0,0.12);
+  }
+
+  .nav-links.open { right: 0; }
+
+  .nav-links a {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(92,26,31,0.1);
+  }
+
+  .nav-links a.cta-link {
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  .nav-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(61,15,19,0.35);
+    backdrop-filter: blur(2px);
+    z-index: 45;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .nav-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .nav-links a {
+    opacity: 0;
+    transform: translateX(12px);
+    transition: right 0.3s ease, opacity 0.35s ease, transform 0.35s ease,
+                border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .nav-links.open a {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .nav-links.open a:nth-child(1) { transition-delay: 0.06s; }
+  .nav-links.open a:nth-child(2) { transition-delay: 0.11s; }
+  .nav-links.open a:nth-child(3) { transition-delay: 0.16s; }
+  .nav-links.open a:nth-child(4) { transition-delay: 0.21s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+a:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--maroon-700);
+  outline-offset: 3px;
+}
+
+/* ---------- SHARED BUTTON MOTION (applies across pages) ---------- */
+.btn-primary,
+.btn-ghost,
+.btn-google,
+.btn-email-send,
+.btn-create-full,
+.btn-small-create,
+.btn-copy,
+.modal-done,
+.cta-block a,
+.nav-links a.cta-link {
+  transition: background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover,
+.btn-create-full:hover:not(:disabled),
+.cta-block a:hover,
+.nav-links a.cta-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(92, 26, 31, 0.22);
+}
+
+.btn-ghost:hover,
+.btn-google:hover:not(:disabled),
+.btn-copy:hover,
+.modal-done:hover,
+.btn-small-create:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.btn-create-full:active:not(:disabled),
+.btn-ghost:active,
+.btn-google:active:not(:disabled),
+.btn-small-create:active,
+.cta-block a:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+}
+
+/* ---------- KEY ROW HOVER (dashboard) ---------- */
+.key-row {
+  transition: background 0.2s ease;
+}
+.key-row:hover {
+  background: rgba(92, 26, 31, 0.035);
+}
+
+.btn-revoke {
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.btn-revoke:hover:not(:disabled) { transform: translateY(-1px); }
+
+/* ---------- VIEW TAB SLIDE ---------- */
+.view-tab {
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.view {
+  animation: view-fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes view-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- MODAL MOTION ---------- */
+.modal-overlay {
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.modal-overlay.show { opacity: 1; }
+
+.modal-panel {
+  transform: scale(0.94) translateY(10px);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+}
+.modal-overlay.show .modal-panel {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* ---------- DETAILS/SUMMARY SMOOTH OPEN ---------- */
+details pre {
+  animation: details-open 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes details-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- LOADING SPINNER ---------- */
+.loader-spin {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(92, 26, 31, 0.15);
+  border-top-color: var(--maroon-700);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view { animation: none; }
+  .modal-panel, .modal-overlay { transition: none; }
+  .loader-spin { animation-duration: 1.4s; }
+}

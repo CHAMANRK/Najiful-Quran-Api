@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About — Najeef Quran API</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/shared.js" defer></script>
+<style>
+  .hero {
+    padding: 90px 32px 60px;
+    max-width: 720px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--maroon-500);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .hero h1 {
+    font-family: 'Amiri', serif;
+    font-size: clamp(32px, 5vw, 48px);
+    color: var(--maroon-900);
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+
+  .hero p {
+    font-size: 15.5px;
+    color: var(--maroon-600);
+    line-height: 1.75;
+    max-width: 560px;
+  }
+
+  .hero p + p { margin-top: 16px; }
+
+  .facts-block {
+    max-width: 720px;
+    padding: 0 32px 60px;
+  }
+
+  .fact-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--maroon-100);
+    font-size: 14px;
+  }
+
+  .fact-row:last-child { border-bottom: 1px solid var(--maroon-100); }
+
+  .fact-row .k {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--maroon-500);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .fact-row .v {
+    color: var(--maroon-900);
+    line-height: 1.6;
+  }
+
+  .fact-row .v code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--cream-2);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.88em;
+    color: var(--maroon-700);
+  }
+
+  .cta-block {
+    max-width: 720px;
+    padding: 0 32px 100px;
+  }
+
+  .cta-block a {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--cream);
+    background: var(--maroon-700);
+    padding: 15px 26px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+
+  .cta-block a:hover { background: var(--maroon-600); }
+
+  @media (max-width: 640px) {
+    .hero, .facts-block, .cta-block { padding-left: 20px; padding-right: 20px; }
+    .fact-row { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-brand">﴾ Najeef Quran API ﴿</a>
+  <button class="burger" id="burgerBtn" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links" id="navLinks">
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/docs.html">Documentation</a>
+    <a href="/about.html" class="active">About</a>
+  </div>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<section class="hero">
+  <div class="eyebrow">About</div>
+  <h1>Built to remove one excuse for not shipping.</h1>
+  <p>This API exists so that building something Quran-related doesn't start with typing out 6,236 ayahs into a spreadsheet. Generate a key, call an endpoint, get structured data back.</p>
+  <p>It's a small, self-serve project — no accounts, no billing, no dashboard to configure. Keys expire on their own, and the whole thing is built to stay online without hand-holding.</p>
+</section>
+
+<section class="facts-block">
+
+  <div class="fact-row">
+    <div class="k">Dataset</div>
+    <div class="v">6,236 valid ayahs, each tagged with surah number, surah name, ayah number, page, para (juz), and PIP.</div>
+  </div>
+
+  <div class="fact-row">
+    <div class="k">Built by</div>
+    <div class="v">Najiful Islam — an independent developer's project, built for easy Quran data access.</div>
+  </div>
+
+  <div class="fact-row">
+    <div class="k">Stack</div>
+    <div class="v">Node.js + Express for the API, MongoDB (via Mongoose) for key and user persistence, Firebase Authentication for sign-in.</div>
+  </div>
+
+  <div class="fact-row">
+    <div class="k">Rate limits</div>
+    <div class="v">Every key allows <code>100</code> requests. At creation you choose how long it lasts — <code>15 days</code>, <code>1 month</code>, <code>6 months</code>, or no expiration. Each IP can hold up to <code>5</code> active keys, and each account up to <code>10</code>.</div>
+  </div>
+
+  <div class="fact-row">
+    <div class="k">Uptime</div>
+    <div class="v">The <code>/health</code> endpoint reports server and database status, and is monitored to keep the service awake.</div>
+  </div>
+
+</section>
+
+<section class="cta-block">
+  <a href="/dashboard.html">Generate your first key →</a>
+</section>
+
+</body>
+</html>

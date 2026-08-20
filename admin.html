@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Najeef Quran API</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/shared.js" defer></script>
+<style>
+  .hero {
+    padding: 60px 32px 4px;
+    max-width: 1100px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--maroon-500);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Amiri', serif;
+    font-size: clamp(28px, 4.5vw, 38px);
+    color: var(--maroon-900);
+    line-height: 1.2;
+  }
+
+  .nav-user-desktop {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .nav-user-desktop .footer-email {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--maroon-600);
+  }
+  .signout {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--maroon-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 6px;
+    white-space: nowrap;
+  }
+  .signout:hover { color: var(--maroon-900); }
+  @media (max-width: 720px) { .nav-user-desktop { display: none; } }
+
+  .nav-footer { display: none; }
+  @media (max-width: 720px) {
+    .nav-links { justify-content: space-between; }
+    .nav-footer {
+      display: block; width: 100%; padding-top: 20px; margin-top: auto;
+      border-top: 1px solid var(--maroon-100);
+    }
+    .nav-footer .footer-email {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--maroon-600);
+      word-break: break-all; margin-bottom: 14px;
+    }
+    .nav-footer .footer-signout {
+      font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600;
+      color: #A13A2E; background: none; border: 1.5px solid rgba(161,58,46,0.3);
+      padding: 10px 16px; border-radius: 10px; cursor: pointer; width: 100%;
+    }
+    .nav-footer .footer-signout:hover { background: rgba(161,58,46,0.08); }
+  }
+
+  /* ---------- GATE (checking / denied) ---------- */
+  .gate {
+    max-width: 640px;
+    padding: 80px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--maroon-600);
+    font-size: 14px;
+  }
+  .gate.hidden { display: none; }
+
+  /* ---------- VIEW TABS ---------- */
+  .view-tabs {
+    max-width: 1100px;
+    padding: 20px 32px 0;
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--maroon-100);
+  }
+  .view-tab {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--maroon-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 12px 6px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+  }
+  .view-tab.active { color: var(--maroon-900); border-bottom-color: var(--maroon-700); }
+  .view-tab:hover:not(.active) { color: var(--maroon-700); }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- OVERVIEW ---------- */
+  .stat-grid {
+    max-width: 1100px;
+    padding: 40px 32px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  .stat-card {
+    background: var(--cream-2);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .stat-card .n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--maroon-700);
+  }
+  .stat-card .l {
+    font-size: 11px;
+    color: var(--maroon-500);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+  .meta-row {
+    max-width: 1100px;
+    padding: 8px 32px 60px;
+    font-size: 12.5px;
+    color: var(--maroon-500);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- BLOCKS ---------- */
+  .admin-block {
+    max-width: 1100px;
+    padding: 32px 32px 100px;
+  }
+  .admin-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .admin-head h2 { font-size: 15px; color: var(--maroon-900); font-weight: 700; }
+
+  .search-box {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--maroon-300);
+    background: var(--cream);
+    color: var(--ink);
+    min-width: 220px;
+  }
+  .search-box:focus { outline: none; border-color: var(--maroon-700); }
+  .search-box::placeholder { color: var(--maroon-300); }
+
+  .list-empty {
+    padding: 30px 0;
+    font-size: 13.5px;
+    color: var(--maroon-500);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ---------- USER ROW ---------- */
+  .user-row {
+    display: grid;
+    grid-template-columns: 1.6fr 0.8fr 0.8fr 0.9fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid var(--maroon-100);
+    font-size: 12.5px;
+  }
+  .user-row:last-child { border-bottom: 1px solid var(--maroon-100); }
+  .user-row .uemail { font-weight: 600; color: var(--maroon-900); word-break: break-all; }
+  .user-row .uprovider { color: var(--maroon-500); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .user-row .umeta { color: var(--maroon-500); font-size: 12px; }
+  .user-row .unum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--maroon-600);
+  }
+
+  .ustatus {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .ustatus.ok { background: rgba(46,107,62,0.12); color: #2E6B3E; }
+  .ustatus.blocked { background: rgba(161,58,46,0.12); color: #A13A2E; }
+
+  .btn-block {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #A13A2E;
+    background: none;
+    border: 1.5px solid rgba(161,58,46,0.35);
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-block:hover { background: rgba(161,58,46,0.08); }
+  .btn-block.unblock { color: #2E6B3E; border-color: rgba(46,107,62,0.35); }
+  .btn-block.unblock:hover { background: rgba(46,107,62,0.08); }
+  .btn-block:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ---------- KEY ROW ---------- */
+  .key-row {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 0.9fr 0.9fr 0.7fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid var(--maroon-100);
+    font-size: 12.5px;
+  }
+  .key-row:last-child { border-bottom: 1px solid var(--maroon-100); }
+  .key-row .kname { font-weight: 600; color: var(--maroon-900); }
+  .key-row .kemail { color: var(--maroon-600); font-size: 12px; word-break: break-all; }
+  .key-row .kpreview {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--maroon-600);
+    font-size: 11.5px;
+  }
+  .key-row .kmeta { color: var(--maroon-500); font-size: 11.5px; }
+  .key-row .kusage {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--maroon-600);
+  }
+
+  .kstatus {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .kstatus.active { background: rgba(46,107,62,0.12); color: #2E6B3E; }
+  .kstatus.expired { background: rgba(139,58,63,0.12); color: #A13A2E; }
+
+  .btn-revoke {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #A13A2E;
+    background: none;
+    border: 1.5px solid rgba(161,58,46,0.35);
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+  }
+  .btn-revoke:hover { background: rgba(161,58,46,0.08); }
+  .btn-revoke:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  @media (max-width: 900px) {
+    .user-row, .key-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 18px 0;
+    }
+    .user-row .btn-block, .key-row .btn-revoke { justify-self: start; margin-top: 8px; }
+  }
+
+  @media (max-width: 720px) {
+    .hero, .view-tabs, .stat-grid, .meta-row, .admin-block { padding-left: 20px; padding-right: 20px; }
+    .admin-head { flex-direction: column; align-items: flex-start; }
+    .search-box { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-brand">﴾ Najeef Quran API ﴿</a>
+  <button class="burger" id="burgerBtn" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-user-desktop">
+    <span class="footer-email" id="desktopEmail"></span>
+    <button class="signout" id="signOutBtn">Sign out</button>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/admin.html" class="active">Admin</a>
+    <a href="/docs.html">Documentation</a>
+    <a href="/about.html">About</a>
+    <div class="nav-footer">
+      <div class="footer-email" id="footerEmail"></div>
+      <button class="footer-signout" id="footerSignOutBtn">Sign out</button>
+    </div>
+  </div>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<section class="hero">
+  <div class="eyebrow">Admin</div>
+  <h1>Control panel</h1>
+</section>
+
+<div class="gate" id="gateChecking">
+  <span class="loader-spin" style="width:20px;height:20px;border-width:2px;"></span> Checking admin access…
+</div>
+
+<div class="gate hidden" id="gateDenied">
+  You don't have admin access on this account. If this is a mistake, ask an existing admin to add your email to <code>ADMIN_EMAILS</code>.
+</div>
+
+<div id="adminApp" style="display:none;">
+
+  <div class="view-tabs">
+    <button class="view-tab active" data-view="overviewView">Overview</button>
+    <button class="view-tab" data-view="usersView">Users</button>
+    <button class="view-tab" data-view="keysView">All keys</button>
+  </div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="view active" id="overviewView">
+    <div class="stat-grid" id="statGrid">
+      <div class="stat-card"><div class="n" id="sTotalUsers">—</div><div class="l">Total users</div></div>
+      <div class="stat-card"><div class="n" id="sBlockedUsers">—</div><div class="l">Blocked users</div></div>
+      <div class="stat-card"><div class="n" id="sTotalKeys">—</div><div class="l">Total keys</div></div>
+      <div class="stat-card"><div class="n" id="sActiveKeys">—</div><div class="l">Active keys</div></div>
+      <div class="stat-card"><div class="n" id="sRevokedKeys">—</div><div class="l">Revoked keys</div></div>
+      <div class="stat-card"><div class="n" id="sExpiredKeys">—</div><div class="l">Expired keys</div></div>
+      <div class="stat-card"><div class="n" id="sTotalRequests">—</div><div class="l">Total requests served</div></div>
+      <div class="stat-card"><div class="n" id="sUptime">—</div><div class="l">Server uptime</div></div>
+    </div>
+    <div class="meta-row">
+      <span id="mDb">DB: —</span>
+      <span id="mFirebase">Firebase: —</span>
+      <span id="mRecords">Quran records: —</span>
+      <span id="mTime">—</span>
+    </div>
+  </section>
+
+  <!-- ============ USERS ============ -->
+  <section class="view" id="usersView">
+    <div class="admin-block">
+      <div class="admin-head">
+        <h2>All users</h2>
+        <input type="text" class="search-box" id="userSearch" placeholder="Filter by email…" />
+      </div>
+      <div id="userList">
+        <div class="list-empty"><span class="loader-spin" style="width:16px;height:16px;border-width:2px;"></span> Loading…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ALL KEYS ============ -->
+  <section class="view" id="keysView">
+    <div class="admin-block">
+      <div class="admin-head">
+        <h2>All API keys</h2>
+        <input type="text" class="search-box" id="keySearch" placeholder="Filter by owner email…" />
+      </div>
+      <div id="keyList">
+        <div class="list-empty"><span class="loader-spin" style="width:16px;height:16px;border-width:2px;"></span> Loading…</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script type="module">
+  import { watchAuthState, logOut, getIdToken } from "/auth.js";
+
+  const BASE_URL = window.location.origin;
+
+  let allUsers = [];
+  let allKeys = [];
+
+  // ---------- View tabs ----------
+  const tabs = document.querySelectorAll(".view-tab");
+  const views = document.querySelectorAll(".view");
+
+  function switchView(viewId) {
+    views.forEach((v) => v.classList.toggle("active", v.id === viewId));
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset.view === viewId));
+  }
+
+  tabs.forEach((tab) => tab.addEventListener("click", () => switchView(tab.dataset.view)));
+
+  // ---------- Sign out ----------
+  async function handleSignOut() {
+    await logOut();
+    window.location.href = "/login.html";
+  }
+  document.getElementById("signOutBtn").addEventListener("click", handleSignOut);
+  document.getElementById("footerSignOutBtn").addEventListener("click", handleSignOut);
+
+  // ---------- Helpers ----------
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str == null ? "" : String(str);
+    return div.innerHTML;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "Never";
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  function formatUptime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}h ${m}m`;
+  }
+
+  async function authedFetch(path, options = {}) {
+    const idToken = await getIdToken();
+    if (!idToken) throw new Error("Not signed in");
+    const res = await fetch(BASE_URL + path, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + idToken,
+        ...(options.headers || {})
+      }
+    });
+    return res.json();
+  }
+
+  // ---------- Auth guard + admin gate ----------
+  watchAuthState(async (user) => {
+    if (!user) {
+      window.location.href = "/login.html";
+      return;
+    }
+
+    document.getElementById("footerEmail").textContent = user.email || "Signed in";
+    document.getElementById("desktopEmail").textContent = user.email || "Signed in";
+
+    try {
+      const data = await authedFetch("/api/admin/overview");
+
+      if (!data.success) {
+        document.getElementById("gateChecking").classList.add("hidden");
+        document.getElementById("gateDenied").classList.remove("hidden");
+        return;
+      }
+
+      document.getElementById("gateChecking").classList.add("hidden");
+      document.getElementById("adminApp").style.display = "block";
+      renderOverview(data);
+      loadUsers();
+      loadKeys();
+    } catch (err) {
+      document.getElementById("gateChecking").classList.add("hidden");
+      document.getElementById("gateDenied").classList.remove("hidden");
+    }
+  });
+
+  // ---------- Overview ----------
+  function renderOverview(d) {
+    document.getElementById("sTotalUsers").textContent = d.totalUsers;
+    document.getElementById("sBlockedUsers").textContent = d.blockedUsers;
+    document.getElementById("sTotalKeys").textContent = d.totalKeys;
+    document.getElementById("sActiveKeys").textContent = d.activeKeys;
+    document.getElementById("sRevokedKeys").textContent = d.revokedKeys;
+    document.getElementById("sExpiredKeys").textContent = d.expiredKeys;
+    document.getElementById("sTotalRequests").textContent = d.totalRequests;
+    document.getElementById("sUptime").textContent = formatUptime(d.uptime);
+
+    document.getElementById("mDb").textContent = "DB: " + d.dbStatus;
+    document.getElementById("mFirebase").textContent = "Firebase: " + (d.firebaseReady ? "ready" : "not configured");
+    document.getElementById("mRecords").textContent = "Quran records: " + d.quranRecords;
+    document.getElementById("mTime").textContent = "Server time: " + new Date(d.serverTime).toLocaleString();
+  }
+
+  // ---------- Users ----------
+  async function loadUsers() {
+    const userList = document.getElementById("userList");
+    try {
+      const data = await authedFetch("/api/admin/users");
+      if (!data.success) {
+        userList.innerHTML = `<div class="list-empty">Couldn't load users.</div>`;
+        return;
+      }
+      allUsers = data.users;
+      renderUsers(allUsers);
+    } catch (err) {
+      userList.innerHTML = `<div class="list-empty">Couldn't reach the server.</div>`;
+    }
+  }
+
+  function renderUsers(users) {
+    const userList = document.getElementById("userList");
+    if (!users.length) {
+      userList.innerHTML = `<div class="list-empty">No users found.</div>`;
+      return;
+    }
+
+    userList.innerHTML = users.map((u) => `
+      <div class="user-row">
+        <div>
+          <div class="uemail">${escapeHtml(u.email)}</div>
+          <div class="uprovider">${escapeHtml(u.provider)}</div>
+        </div>
+        <div class="umeta">Joined ${formatDate(u.firstSeenAt)}</div>
+        <div class="umeta">Seen ${formatDate(u.lastSeenAt)}</div>
+        <div class="unum">${u.activeKeyCount}/${u.keyCount} keys active</div>
+        <div class="unum">${u.totalRequests} requests</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="ustatus ${u.blocked ? "blocked" : "ok"}">${u.blocked ? "Blocked" : "Active"}</span>
+          <button class="btn-block ${u.blocked ? "unblock" : ""}" data-uid="${escapeHtml(u.uid)}" data-blocked="${u.blocked}">
+            ${u.blocked ? "Unblock" : "Block"}
+          </button>
+        </div>
+      </div>
+    `).join("");
+
+    userList.querySelectorAll("[data-uid]").forEach((btn) => {
+      btn.addEventListener("click", () => toggleBlock(btn));
+    });
+  }
+
+  async function toggleBlock(btn) {
+    const uid = btn.dataset.uid;
+    const currentlyBlocked = btn.dataset.blocked === "true";
+    const nextBlocked = !currentlyBlocked;
+
+    const verb = nextBlocked ? "block" : "unblock";
+    if (!confirm(`${verb === "block" ? "Block" : "Unblock"} this user? ${nextBlocked ? "They will not be able to generate new API keys." : ""}`)) return;
+
+    btn.disabled = true;
+    try {
+      const data = await authedFetch(`/api/admin/users/${uid}/block`, {
+        method: "PATCH",
+        body: JSON.stringify({ blocked: nextBlocked })
+      });
+
+      if (data.success) {
+        loadUsers();
+      } else {
+        alert(data.error || "Could not update user.");
+      }
+    } catch (err) {
+      alert("Couldn't reach the server.");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById("userSearch").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    renderUsers(allUsers.filter((u) => u.email.toLowerCase().includes(q)));
+  });
+
+  // ---------- Keys ----------
+  async function loadKeys() {
+    const keyList = document.getElementById("keyList");
+    try {
+      const data = await authedFetch("/api/admin/keys");
+      if (!data.success) {
+        keyList.innerHTML = `<div class="list-empty">Couldn't load keys.</div>`;
+        return;
+      }
+      allKeys = data.keys;
+      renderKeys(allKeys);
+    } catch (err) {
+      keyList.innerHTML = `<div class="list-empty">Couldn't reach the server.</div>`;
+    }
+  }
+
+  function renderKeys(keys) {
+    const keyList = document.getElementById("keyList");
+    if (!keys.length) {
+      keyList.innerHTML = `<div class="list-empty">No keys found.</div>`;
+      return;
+    }
+
+    keyList.innerHTML = keys.map((k) => {
+      const isExpired = k.expired || k.revoked;
+      const statusLabel = isExpired ? "Expired" : "Active";
+      const statusClass = isExpired ? "expired" : "active";
+      const expiryText = k.expiresAt ? formatDate(k.expiresAt) : "No expiration";
+
+      return `
+        <div class="key-row">
+          <div>
+            <div class="kname">${escapeHtml(k.name)}</div>
+            <div class="kpreview">${escapeHtml(k.keyPreview)}</div>
+          </div>
+          <div class="kemail">${escapeHtml(k.email)}</div>
+          <div class="kmeta">Created ${formatDate(k.createdAt)}<br>Expires ${expiryText}</div>
+          <div class="kmeta">IP ${escapeHtml(k.ip)}</div>
+          <div class="kusage">${k.requests}/${k.maxRequests}</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="kstatus ${statusClass}">${statusLabel}</span>
+            <button class="btn-revoke" data-revoke-id="${k.id}" ${isExpired ? "disabled" : ""}>Revoke</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    keyList.querySelectorAll("[data-revoke-id]").forEach((btn) => {
+      btn.addEventListener("click", () => revokeKey(btn.dataset.revokeId, btn));
+    });
+  }
+
+  async function revokeKey(id, btn) {
+    if (!confirm("Revoke this key? This cannot be undone.")) return;
+
+    btn.disabled = true;
+    btn.textContent = "Revoking…";
+
+    try {
+      const data = await authedFetch(`/api/admin/keys/${id}`, { method: "DELETE" });
+
+      if (data.success) {
+        loadKeys();
+      } else {
+        alert(data.error || "Could not revoke key.");
+        btn.disabled = false;
+        btn.textContent = "Revoke";
+      }
+    } catch (err) {
+      alert("Couldn't reach the server.");
+      btn.disabled = false;
+      btn.textContent = "Revoke";
+    }
+  }
+
+  document.getElementById("keySearch").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    renderKeys(allKeys.filter((k) => k.email.toLowerCase().includes(q)));
+  });
+</script>
+
+</body>
+</html>

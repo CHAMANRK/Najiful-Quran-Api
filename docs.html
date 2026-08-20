@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Documentation — Najeef Quran API</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/shared.js" defer></script>
+<style>
+  .hero {
+    padding: 70px 32px 40px;
+    max-width: 780px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--maroon-500);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Amiri', serif;
+    font-size: clamp(32px, 5vw, 46px);
+    color: var(--maroon-900);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--maroon-600);
+    max-width: 540px;
+    line-height: 1.6;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--cream-2);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: var(--maroon-700);
+  }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    color: var(--maroon-900);
+    line-height: 1.6;
+    background: var(--cream-2);
+    border-left: 3px solid var(--maroon-500);
+  }
+
+  pre code { background: none; padding: 0; color: inherit; }
+
+  .auth-strip {
+    max-width: 780px;
+    padding: 0 32px 50px;
+  }
+
+  .auth-strip h2 {
+    font-size: 15px;
+    color: var(--maroon-900);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .auth-strip > p {
+    font-size: 13.5px;
+    color: var(--maroon-600);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* ---------- QUICK JUMP — plain text row, no pills-as-cards ---------- */
+  .quicknav {
+    max-width: 960px;
+    padding: 0 32px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .quicknav a {
+    text-decoration: none;
+    color: var(--maroon-500);
+    border-bottom: 1px dotted var(--maroon-300);
+  }
+  .quicknav a:hover { color: var(--maroon-900); }
+  .quicknav a { transition: color 0.15s ease, border-color 0.15s ease; }
+  .quicknav a.active { color: var(--maroon-900); border-bottom-color: var(--maroon-700); }
+
+  /* ---------- ENDPOINT LIST — flat, divider-based ---------- */
+  .endpoints {
+    max-width: 960px;
+    padding: 20px 32px 100px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--maroon-500);
+    font-weight: 700;
+    margin: 50px 0 6px;
+  }
+
+  .endpoint {
+    padding: 26px 0;
+    border-top: 1px solid var(--maroon-100);
+    scroll-margin-top: 90px;
+  }
+
+  .endpoint:last-child { border-bottom: 1px solid var(--maroon-100); }
+
+  .endpoint-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .method.get { color: var(--get); }
+  .method.post { color: var(--post); }
+
+  .path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--maroon-900);
+  }
+
+  .endpoint-desc {
+    font-size: 13.5px;
+    color: var(--maroon-600);
+    margin-bottom: 14px;
+    line-height: 1.6;
+    max-width: 620px;
+  }
+
+  .param-row {
+    display: flex;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+
+  .param-name {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--maroon-700);
+    min-width: 100px;
+    font-weight: 600;
+  }
+  .param-desc { color: var(--maroon-600); }
+
+  details { margin-top: 8px; }
+
+  summary {
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--maroon-500);
+    padding: 4px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; transition: transform 0.15s ease; }
+  details[open] summary::before { transform: rotate(90deg); }
+
+  details pre { margin-top: 10px; }
+
+  .status-table {
+    width: 100%;
+    max-width: 620px;
+    font-size: 13px;
+    margin-top: 14px;
+  }
+  .status-table td { padding: 9px 0; border-bottom: 1px solid var(--maroon-100); }
+  .status-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--maroon-700);
+    font-weight: 600;
+    width: 56px;
+  }
+
+  @media (max-width: 640px) {
+    .hero, .auth-strip, .quicknav, .endpoints { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-brand">﴾ Najeef Quran API ﴿</a>
+  <button class="burger" id="burgerBtn" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links" id="navLinks">
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/docs.html" class="active">Documentation</a>
+    <a href="/about.html">About</a>
+  </div>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<section class="hero">
+  <div class="eyebrow">Documentation</div>
+  <h1>Every endpoint, in plain terms.</h1>
+  <p>A REST API over the full Quran text — 6,236 ayahs, indexed six different ways. Everything but key generation needs a Bearer token.</p>
+</section>
+
+<section class="auth-strip">
+  <h2>Authentication</h2>
+  <p>Generate a key on the home page, then send it as a Bearer token on every request.</p>
+  <pre><code>curl https://your-api-domain.com/api/quran/1/1 \
+  -H "Authorization: Bearer najeef_chaman_&lt;your-key&gt;"</code></pre>
+</section>
+
+<nav class="quicknav">
+  <a href="#key">Generate key</a>
+  <a href="#exact">Surah + Ayah</a>
+  <a href="#surah">By Surah</a>
+  <a href="#surah-name">By Surah name</a>
+  <a href="#ayat">By Ayah no.</a>
+  <a href="#para">By Para</a>
+  <a href="#page">By Page</a>
+  <a href="#pip">By PIP</a>
+  <a href="#search">Search</a>
+  <a href="#quiz">Quiz</a>
+</nav>
+
+<section class="endpoints">
+
+  <div class="section-label">Access</div>
+
+  <div class="endpoint" id="key">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/key</span></div>
+    <p class="endpoint-desc">Generates a new API key. No auth required. Max 5 active keys per IP.</p>
+    <details>
+      <summary>Example response</summary>
+      <pre><code>{
+  "success": true,
+  "apiKey": "najeef_chaman_a58921...",
+  "expiresIn": "6 hours",
+  "maxRequests": 100
+}</code></pre>
+    </details>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/validate</span></div>
+    <p class="endpoint-desc">Checks whether your key is still valid and how many requests remain.</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/health</span></div>
+    <p class="endpoint-desc">Server and database status. No auth required — useful for uptime monitors.</p>
+  </div>
+
+  <div class="section-label">Reading the Quran</div>
+
+  <div class="endpoint" id="exact">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/:surah/:ayah</span></div>
+    <p class="endpoint-desc">One exact ayah, by surah number and ayah number.</p>
+    <div class="param-row"><span class="param-name">surah</span><span class="param-desc">Surah number, 1–114</span></div>
+    <div class="param-row"><span class="param-name">ayah</span><span class="param-desc">Ayah number within that surah</span></div>
+    <details>
+      <summary>Example</summary>
+      <pre><code>GET /api/quran/1/1
+
+{
+  "success": true,
+  "data": {
+    "surah_name": "Al-Faatiha",
+    "surah_number": 1,
+    "ayat_no": 1,
+    "text": "بِسْمِ ٱللَّهِ...",
+    "page": 1, "para": 1, "pip": 1
+  }
+}</code></pre>
+    </details>
+  </div>
+
+  <div class="endpoint" id="surah">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/surah/:surah</span></div>
+    <p class="endpoint-desc">Every ayah in a surah, by its number.</p>
+    <div class="param-row"><span class="param-name">surah</span><span class="param-desc">Surah number, 1–114</span></div>
+  </div>
+
+  <div class="endpoint" id="surah-name">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/surah-name/:name</span></div>
+    <p class="endpoint-desc">Every ayah in a surah, by its name instead of number. Case-insensitive.</p>
+    <div class="param-row"><span class="param-name">name</span><span class="param-desc">e.g. "Al-Faatiha", "Al-Baqara"</span></div>
+  </div>
+
+  <div class="endpoint" id="ayat">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/ayat/:ayah</span></div>
+    <p class="endpoint-desc">Every ayah across the whole Quran that shares this ayah number — spans every surah.</p>
+    <div class="param-row"><span class="param-name">ayah</span><span class="param-desc">Ayah number to match</span></div>
+  </div>
+
+  <div class="endpoint" id="para">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/para/:para</span></div>
+    <p class="endpoint-desc">Every ayah in a para (juz), 1 through 30.</p>
+    <div class="param-row"><span class="param-name">para</span><span class="param-desc">Para number, 1–30</span></div>
+  </div>
+
+  <div class="endpoint" id="page">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/page/:page</span></div>
+    <p class="endpoint-desc">Every ayah on a given mushaf page.</p>
+    <div class="param-row"><span class="param-name">page</span><span class="param-desc">Page number</span></div>
+  </div>
+
+  <div class="endpoint" id="pip">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/pip/:pip</span></div>
+    <p class="endpoint-desc">Every ayah matching a PIP value (your dataset's custom index field).</p>
+    <div class="param-row"><span class="param-name">pip</span><span class="param-desc">PIP value</span></div>
+  </div>
+
+  <div class="endpoint" id="search">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quran/search?q=</span></div>
+    <p class="endpoint-desc">Full-text search inside ayah text. Matches Arabic substrings in the ayah body, not surah names. Capped at 100 results.</p>
+    <div class="param-row"><span class="param-name">q</span><span class="param-desc">Search string (URL-encoded)</span></div>
+  </div>
+
+  <div class="section-label">Quiz</div>
+
+  <div class="endpoint" id="quiz">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quiz/question</span></div>
+    <p class="endpoint-desc">Returns a random ayah and four surah-number options — one correct. Stays valid for 10 minutes.</p>
+    <details>
+      <summary>Example response</summary>
+      <pre><code>{
+  "success": true,
+  "questionId": "7f3354d5...",
+  "question": "This Ayah belongs to which Surah?",
+  "ayah": "خُذِ ٱلْعَفْوَ...",
+  "options": [39, 7, 35, 11]
+}</code></pre>
+    </details>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/quiz/answer</span></div>
+    <p class="endpoint-desc">Submit an answer for a question ID. Each question can only be answered once.</p>
+    <div class="param-row"><span class="param-name">questionId</span><span class="param-desc">ID from /api/quiz/question</span></div>
+    <div class="param-row"><span class="param-name">answer</span><span class="param-desc">Your chosen surah number</span></div>
+  </div>
+
+  <div class="section-label">Errors</div>
+
+  <table class="status-table">
+    <tr><td>400</td><td>Malformed request — check your parameters.</td></tr>
+    <tr><td>401</td><td>Missing, invalid, or expired API key.</td></tr>
+    <tr><td>404</td><td>No matching data found.</td></tr>
+    <tr><td>429</td><td>Rate limit reached — key's 100 requests, or IP's 5-key cap.</td></tr>
+    <tr><td>500</td><td>Server-side error. Check <code>/health</code>.</td></tr>
+  </table>
+
+</section>
+
+</body>
+</html>
