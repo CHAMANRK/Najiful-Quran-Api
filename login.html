@@ -215,6 +215,7 @@
 <script type="module">
   import {
     signInWithGoogle,
+    completeGoogleRedirectSignIn,
     sendMagicLink,
     completeMagicLinkSignIn,
     watchAuthState
@@ -266,6 +267,12 @@
       loginStatus.textContent = "Sign-in link error: " + err.message;
       loginStatus.className = "login-status error";
     }
+  });
+
+  // If this page load came back from a Google redirect sign-in, complete it
+  completeGoogleRedirectSignIn().catch((err) => {
+    loginStatus.textContent = "Google sign-in failed: " + err.message;
+    loginStatus.className = "login-status error";
   });
 
   // Already signed in (or just completed sign-in) → go to dashboard
