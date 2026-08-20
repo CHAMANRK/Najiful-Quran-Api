@@ -6,7 +6,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   sendSignInLinkToEmail,
@@ -30,45 +29,19 @@ const auth = getAuth(app);
 
 const EMAIL_STORAGE_KEY = "najeefQuranApi_emailForLink";
 
-// Detect mobile / small-screen browsers, where signInWithPopup is unreliable
-// (Firebase's IndexedDB persistence layer can throw "Database is closing/hidden"
-// when the page loses visibility during the popup flow).
-function isMobileBrowser() {
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-}
-
 // ---------- Google Sign-In ----------
+// Redirect flow is used instead of popup because popups get silently
+// blocked by third-party cookie/storage partitioning in Chrome/Safari,
+// which makes sign-in appear to hang with no redirect afterward.
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
-
-  if (isMobileBrowser()) {
-    // Full-page redirect — avoids popup/IndexedDB issues on mobile.
-    // This navigates away; the result is picked up by completeGoogleRedirectSignIn()
-    // on the next page load.
-    await signInWithRedirect(auth, provider);
-    return null;
-  }
-
-  try {
-    const result = await signInWithPopup(auth, provider);
-    return result.user;
-  } catch (err) {
-    // Fallback to redirect if the popup itself fails for any reason
-    // (blocked popup, IndexedDB/visibility errors, etc.)
-    if (
-      err.code === "auth/popup-blocked" ||
-      err.code === "auth/cancelled-popup-request" ||
-      /database is closing|hidden/i.test(err.message || "")
-    ) {
-      await signInWithRedirect(auth, provider);
-      return null;
-    }
-    throw err;
-  }
+  await signInWithRedirect(auth, provider);
+  // Browser navigates away here. Result is picked up by
+  // completeGoogleRedirectSignIn() on the page the user lands back on.
 }
 
-// Call this once on page load (in addition to watchAuthState) to pick up
-// the result of a signInWithRedirect() call from the previous page load.
+// Call this on every page load (alongside completeMagicLinkSignIn) —
+// completes the Google sign-in if this load is the return from a redirect.
 export async function completeGoogleRedirectSignIn() {
   const result = await getRedirectResult(auth);
   return result ? result.user : null;
@@ -77,7 +50,7 @@ export async function completeGoogleRedirectSignIn() {
 // ---------- Email Link (passwordless) ----------
 export async function sendMagicLink(email) {
   const actionCodeSettings = {
-    url: window.location.origin + "/login.html",
+    url: window.location.origin + "/index.html",
     handleCodeInApp: true
   };
   await sendSignInLinkToEmail(auth, email, actionCodeSettings);
