@@ -6,8 +6,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithCredential,
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
   signInWithEmailLink,
@@ -29,22 +28,85 @@ const auth = getAuth(app);
 
 const EMAIL_STORAGE_KEY = "najeefQuranApi_emailForLink";
 
-// ---------- Google Sign-In ----------
-// Redirect flow is used instead of popup because popups get silently
-// blocked by third-party cookie/storage partitioning in Chrome/Safari,
-// which makes sign-in appear to hang with no redirect afterward.
-export async function signInWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  await signInWithRedirect(auth, provider);
-  // Browser navigates away here. Result is picked up by
-  // completeGoogleRedirectSignIn() on the page the user lands back on.
+// ---------- Google Identity Services (One Tap + inline button) ----------
+// This replaces the old signInWithRedirect flow. GIS runs in a floating
+// overlay / inline button on top of the current page — no navigation away
+// and back, so there's nothing that can get "stuck" mid-redirect.
+const GOOGLE_CLIENT_ID = "603740332753-7cdsq60g9c9n6bkn3d8ihb4od6ad7ha2.apps.googleusercontent.com";
+
+let gisLoadPromise = null;
+function loadGoogleIdentityScript() {
+  if (gisLoadPromise) return gisLoadPromise;
+  gisLoadPromise = new Promise((resolve, reject) => {
+    if (window.google?.accounts?.id) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Couldn't load Google Sign-In."));
+    document.head.appendChild(script);
+  });
+  return gisLoadPromise;
 }
 
-// Call this on every page load (alongside completeMagicLinkSignIn) —
-// completes the Google sign-in if this load is the return from a redirect.
-export async function completeGoogleRedirectSignIn() {
-  const result = await getRedirectResult(auth);
-  return result ? result.user : null;
+// Exchanges the ID token GIS hands back (from One Tap or the button) for a
+// real Firebase session. onAuthStateChanged fires from this automatically.
+// On failure, dispatches a "gis-auth-error" event on window so the page can
+// surface a message without needing its own try/catch around GIS's callback.
+async function handleGoogleCredential(response) {
+  try {
+    const credential = GoogleAuthProvider.credential(response.credential);
+    await signInWithCredential(auth, credential);
+  } catch (err) {
+    window.dispatchEvent(new CustomEvent("gis-auth-error", { detail: err }));
+  }
+}
+
+let gisInitialized = false;
+async function ensureGisInitialized() {
+  await loadGoogleIdentityScript();
+  if (gisInitialized) return;
+  window.google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+  gisInitialized = true;
+}
+
+// Call once per page load. Shows the floating One Tap prompt automatically
+// if the browser/user is eligible. Safe to call even if it ends up not
+// showing anything (already dismissed recently, no eligible session, etc.)
+// — that's normal Google behavior, not an error.
+export async function initGoogleOneTap() {
+  try {
+    await ensureGisInitialized();
+    window.google.accounts.id.prompt();
+  } catch (err) {
+    console.warn("One Tap unavailable:", err);
+  }
+}
+
+// Renders an actual "Sign in with Google" button inside the given element.
+// Use this as the manual login CTA wherever a locked/logged-out action is.
+export async function renderGoogleButton(elementId, options = {}) {
+  await ensureGisInitialized();
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.innerHTML = "";
+  window.google.accounts.id.renderButton(el, {
+    theme: "outline",
+    size: "large",
+    shape: "pill",
+    text: "signin_with",
+    width: 280,
+    ...options
+  });
 }
 
 // ---------- Email Link (passwordless) ----------
