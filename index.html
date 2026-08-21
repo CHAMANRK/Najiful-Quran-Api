@@ -211,16 +211,7 @@
 
 <nav class="nav">
   <a href="/index.html" class="nav-brand">﴾ Najeef Quran API ﴿</a>
-  <button class="burger" id="burgerBtn" aria-label="Menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="nav-links" id="navLinks">
-    <a href="/index.html" class="active">Sign in</a>
-    <a href="/docs.html">Documentation</a>
-    <a href="/about.html">About</a>
-  </div>
 </nav>
-<div class="nav-overlay" id="navOverlay"></div>
 
 <!-- Shown while we check whether a session already exists -->
 <div class="boot-wrap" id="bootWrap">
@@ -331,7 +322,7 @@
   // Single source of truth: signed in -> dashboard, signed out -> show login form here
   watchAuthState((user) => {
     if (user) {
-      window.location.href = "/dashboard.html";
+      window.location.replace("/dashboard.html");
     } else {
       showLoginScreen();
     }

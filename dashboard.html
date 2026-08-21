@@ -7,6 +7,57 @@
 <link rel="stylesheet" href="/shared.css">
 <script src="/shared.js" defer></script>
 <style>
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Boot / checking-session screen ---------- */
+  .boot-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: fade-in 0.4s ease forwards;
+  }
+
+  .boot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .boot-mark {
+    font-family: 'Amiri', Georgia, serif;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    color: var(--maroon-900, #3D0F13);
+    opacity: 0.9;
+  }
+
+  .boot-spin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid rgba(92, 26, 31, 0.15);
+    border-top-color: #5C1A1F;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes fade-in { to { opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boot-wrap { animation: none; opacity: 1; }
+    .boot-spin { animation-duration: 1.4s; }
+  }
+
+  /* App content stays hidden until auth is confirmed */
+  #appShell { display: none; }
+
   .hero {
     padding: 60px 32px 4px;
     max-width: 900px;
@@ -508,6 +559,15 @@
 </head>
 <body>
 
+<!-- Shown while we verify the session; nothing else renders until this resolves -->
+<div class="boot-wrap" id="bootWrap">
+  <div class="boot">
+    <div class="boot-mark">﴾ Najeef Quran API ﴿</div>
+    <div class="boot-spin" role="status" aria-label="Loading"></div>
+  </div>
+</div>
+
+<div id="appShell">
 <nav class="nav">
   <a href="/dashboard.html" class="nav-brand">﴾ Najeef Quran API ﴿</a>
   <button class="burger" id="burgerBtn" aria-label="Menu" aria-expanded="false">
@@ -618,11 +678,14 @@
     </div>
   </div>
 </div>
+</div><!-- /#appShell -->
 
 <script type="module">
   import { watchAuthState, logOut, getIdToken } from "/auth.js";
 
   const BASE_URL = window.location.origin;
+  const bootWrap = document.getElementById("bootWrap");
+  const appShell = document.getElementById("appShell");
 
   // ---------- View tabs ----------
   const tabs = document.querySelectorAll(".view-tab");
@@ -643,7 +706,7 @@
   // ---------- Sign out ----------
   async function handleSignOut() {
     await logOut();
-    window.location.href = "/login.html";
+    window.location.href = "/index.html";
   }
   document.getElementById("signOutBtn").addEventListener("click", handleSignOut);
   document.getElementById("footerSignOutBtn").addEventListener("click", handleSignOut);
@@ -695,7 +758,7 @@
 
     const idToken = await getIdToken();
     if (!idToken) {
-      window.location.href = "/login.html";
+      window.location.href = "/index.html";
       return;
     }
 
@@ -746,11 +809,16 @@
   });
 
   // ---------- Auth guard ----------
+  // appShell (nav + hamburger + all page content) stays hidden until this
+  // fires with a signed-in user, so the menu can't be used to reach other
+  // pages before login is actually confirmed.
   watchAuthState((user) => {
     if (!user) {
-      window.location.href = "/login.html";
+      window.location.replace("/index.html");
       return;
     }
+    bootWrap.style.display = "none";
+    appShell.style.display = "block";
     const email = user.email || "Signed in";
     document.getElementById("footerEmail").textContent = email;
     document.getElementById("desktopEmail").textContent = email;
