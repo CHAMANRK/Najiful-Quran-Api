@@ -346,24 +346,72 @@
 
   <div class="endpoint" id="quiz">
     <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/quiz/question</span></div>
-    <p class="endpoint-desc">Returns a random ayah and four surah-number options — one correct. Stays valid for 10 minutes.</p>
+    <p class="endpoint-desc">Returns a random ayah with four options — one correct, three real distractors pulled from actual Quran data. Each question stays valid for 10 minutes.</p>
+    <div class="param-row"><span class="param-name">type</span><span class="param-desc">Optional. One of <code>surah_number</code>, <code>surah_name</code>, <code>para</code>, <code>page</code>, <code>pip</code>. If given, returns a single question of that type. If omitted, returns an array of 3 questions: <code>para</code> and <code>pip</code> (always included) plus one random question from <code>surah_number</code> / <code>surah_name</code> / <code>page</code>.</span></div>
     <details>
-      <summary>Example response</summary>
+      <summary>Example response — single type (?type=surah_name)</summary>
       <pre><code>{
   "success": true,
   "questionId": "7f3354d5...",
+  "type": "surah_name",
   "question": "This Ayah belongs to which Surah?",
   "ayah": "خُذِ ٱلْعَفْوَ...",
-  "options": [39, 7, 35, 11]
+  "ayatNo": 199,
+  "page": 176,
+  "para": 9,
+  "pip": 21,
+  "options": ["Al-A'raf", "Yunus", "Hud", "An-Nahl"]
+}</code></pre>
+    </details>
+    <details>
+      <summary>Example response — no type (3 questions)</summary>
+      <pre><code>{
+  "success": true,
+  "questions": [
+    {
+      "questionId": "a1b2c3...",
+      "type": "para",
+      "question": "This Ayah belongs to which Para?",
+      "ayah": "...",
+      "ayatNo": 12,
+      "surahName": "Al-Baqarah",
+      "page": 4,
+      "pip": 2,
+      "options": [1, 2, 9, 15]
+    },
+    {
+      "questionId": "d4e5f6...",
+      "type": "pip",
+      "question": "This Ayah belongs to which PIP?",
+      "ayah": "...",
+      "ayatNo": 87,
+      "surahName": "Al-Imran",
+      "page": 61,
+      "para": 3,
+      "options": [7, 21, 34, 40]
+    },
+    {
+      "questionId": "g7h8i9...",
+      "type": "surah_number",
+      "question": "This Ayah belongs to which Surah? (number)",
+      "ayah": "...",
+      "ayatNo": 5,
+      "surahName": "An-Nisa",
+      "page": 77,
+      "para": 4,
+      "pip": 18,
+      "options": [39, 7, 35, 11]
+    }
+  ]
 }</code></pre>
     </details>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/quiz/answer</span></div>
-    <p class="endpoint-desc">Submit an answer for a question ID. Each question can only be answered once.</p>
+    <p class="endpoint-desc">Submit an answer for a question ID. Each question can only be answered once. Numeric types (<code>surah_number</code>, <code>para</code>, <code>page</code>, <code>pip</code>) are compared as numbers; <code>surah_name</code> is compared case-insensitively.</p>
     <div class="param-row"><span class="param-name">questionId</span><span class="param-desc">ID from /api/quiz/question</span></div>
-    <div class="param-row"><span class="param-name">answer</span><span class="param-desc">Your chosen surah number</span></div>
+    <div class="param-row"><span class="param-name">answer</span><span class="param-desc">Your chosen option (number, or surah name string for surah_name questions)</span></div>
   </div>
 
   <div class="section-label">Errors</div>

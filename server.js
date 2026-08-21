@@ -176,6 +176,87 @@ function cleanupExpiredQuizzes() {
 
 setInterval(cleanupExpiredQuizzes, 5 * 60 * 1000);
 
+// Config for every supported quiz type.
+// field       -> which ayah field holds the correct answer
+// numeric     -> whether the answer/options are numbers or strings
+// question    -> the question text shown to the user
+// metaKey     -> the key (if any) in the response "meta" block that would
+//                leak the answer for this type, so it gets stripped out
+const QUIZ_CONFIG = {
+    surah_number: { field: "surah_number", numeric: true, question: "This Ayah belongs to which Surah? (number)", metaKey: null },
+    surah_name: { field: "surah_name", numeric: false, question: "This Ayah belongs to which Surah?", metaKey: "surahName" },
+    para: { field: "para", numeric: true, question: "This Ayah belongs to which Para?", metaKey: "para" },
+    page: { field: "page", numeric: true, question: "This Ayah belongs to which Page?", metaKey: "page" },
+    pip: { field: "pip", numeric: true, question: "This Ayah belongs to which PIP?", metaKey: "pip" }
+};
+
+const QUIZ_TYPES = Object.keys(QUIZ_CONFIG);
+
+// Builds 4 unique options (1 correct + 3 distractors) pulled from real
+// ayah data — no fake/made-up values, ever.
+function buildQuizOptions(config, correctValue) {
+    const options = [correctValue];
+    const seen = new Set([config.numeric ? correctValue : normalize(correctValue)]);
+
+    let attempts = 0;
+    while (options.length < 4 && attempts < 1000) {
+        attempts++;
+        const randomAyah = allAyahs[Math.floor(Math.random() * allAyahs.length)];
+        const raw = randomAyah[config.field];
+
+        if (raw === undefined || raw === null) continue;
+
+        const candidate = config.numeric ? Number(raw) : String(raw);
+        const key = config.numeric ? candidate : normalize(candidate);
+
+        if (seen.has(key)) continue;
+
+        seen.add(key);
+        options.push(candidate);
+    }
+
+    return options.sort(() => Math.random() - 0.5);
+}
+
+// Generates a single quiz question of the given type, stores it in
+// quizQuestions (with its type, for correct answer-checking later),
+// and returns the payload to send to the client.
+function generateQuizQuestion(type) {
+    const config = QUIZ_CONFIG[type];
+    const ayah = allAyahs[Math.floor(Math.random() * allAyahs.length)];
+    const rawValue = ayah[config.field];
+    const correct = config.numeric ? Number(rawValue) : rawValue;
+    const options = buildQuizOptions(config, correct);
+    const questionId = crypto.randomBytes(16).toString("hex");
+
+    quizQuestions.set(questionId, {
+        type,
+        correct,
+        expiresAt: Date.now() + QUIZ_TTL
+    });
+
+    const meta = {
+        ayatNo: ayah.ayat_no,
+        surahName: ayah.surah_name,
+        page: ayah.page,
+        para: ayah.para,
+        pip: ayah.pip
+    };
+
+    if (config.metaKey) {
+        delete meta[config.metaKey];
+    }
+
+    return {
+        questionId,
+        type,
+        question: config.question,
+        ayah: ayah.text,
+        ...meta,
+        options
+    };
+}
+
 // ==================================================
 // HELPERS
 // ==================================================
@@ -704,35 +785,39 @@ app.get("/api/quiz/question", requireApiKey, (req, res) => {
         return res.status(500).json({ success: false, error: "No Quran data available." });
     }
 
-    const ayah = allAyahs[Math.floor(Math.random() * allAyahs.length)];
-    const correct = Number(ayah.surah_number);
+    const typeParam = req.query.type;
 
-    const options = new Set();
-    options.add(correct);
+    // Single-type mode: ?type=surah_number / surah_name / para / page / pip
+    if (typeParam) {
+        const type = normalize(typeParam);
 
-    while (options.size < 4) {
-        options.add(Math.floor(Math.random() * 114) + 1);
+        if (!QUIZ_TYPES.includes(type)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid type. Must be one of: ${QUIZ_TYPES.join(", ")}`
+            });
+        }
+
+        return res.json({
+            success: true,
+            ...generateQuizQuestion(type)
+        });
     }
 
-    const shuffled = [...options].sort(() => Math.random() - 0.5);
-    const questionId = crypto.randomBytes(16).toString("hex");
+    // Default mode (no type given): 3 questions — para + pip (mandatory)
+    // and one random optional type from surah_number / surah_name / page.
+    const OPTIONAL_TYPES = ["surah_number", "surah_name", "page"];
+    const optionalType = OPTIONAL_TYPES[Math.floor(Math.random() * OPTIONAL_TYPES.length)];
 
-    quizQuestions.set(questionId, {
-        correct,
-        expiresAt: Date.now() + QUIZ_TTL
-    });
+    const questions = [
+        generateQuizQuestion("para"),
+        generateQuizQuestion("pip"),
+        generateQuizQuestion(optionalType)
+    ];
 
     res.json({
         success: true,
-        questionId,
-        question: "This Ayah belongs to which Surah?",
-        ayah: ayah.text,
-        surahName: ayah.surah_name,
-        ayatNo: ayah.ayat_no,
-        page: ayah.page,
-        para: ayah.para,
-        pip: ayah.pip,
-        options: shuffled
+        questions
     });
 });
 
@@ -755,11 +840,16 @@ app.post("/api/quiz/answer", requireApiKey, (req, res) => {
 
     quizQuestions.delete(questionId);
 
-    const userAnswer = Number(answer);
-    const isCorrect = userAnswer === questionData.correct;
+    const isNameType = questionData.type === "surah_name";
+
+    const userAnswer = isNameType ? String(answer || "") : Number(answer);
+    const isCorrect = isNameType
+        ? normalize(userAnswer) === normalize(questionData.correct)
+        : userAnswer === questionData.correct;
 
     res.json({
         success: true,
+        type: questionData.type,
         correct: isCorrect,
         userAnswer,
         correctAnswer: questionData.correct,
